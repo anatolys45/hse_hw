@@ -100,16 +100,19 @@ gunzip chip1.bed.gz chip2.bed.gz chip3.bed.gz atac.bed.gz
 # sorting and indexing
 sudo apt install bedtools
 
-bedtools sort -i chip1.bed.gz > sort_chip1.bed
-bedtools sort -i chip2.bed.gz > sort_chip2.bed
-bedtools sort -i chip3.bed.gz > sort_chip3.bed
-bedtools sort -i atac.bed.gz > sort_atac.bed
+bedtools sort -i chip1.bed > sort_chip1.bed
+bedtools sort -i chip2.bed > sort_chip2.bed
+bedtools sort -i chip3.bed > sort_chip3.bed
+bedtools sort -i atac.bed > sort_atac.bed
 
-for i in sort_atac sort_chip1 sort_chip2 sort_chip3
-do
-    bgzip i.bed
-    tabix i.bed.gz
-done
+bgzip sort_chip1.bed
+tabix sort_chip1.bed.gz
+bgzip sort_chip2.bed
+tabix sort_chip2.bed.gz
+bgzip sort_chip3.bed
+tabix sort_chip3.bed.gz
+bgzip sort_atac.bed
+tabix sort_atac.bed.gz
 ```
 
 ## JBrowse 2
@@ -120,7 +123,7 @@ sudo apt install build-essential zlib1g-dev
 sudo apt install nginx
 sudo apt install npm
 sudo apt install genometools
-npm install -g @jbrowse/cli
+sudo npm install -g @jbrowse/cli
 ```
 
 Create a new jbrowse repository and changing the configuraton file of nginx
@@ -150,3 +153,5 @@ Add indexing
 ```
 sudo jbrowse text-index --out //mnt/JBrowse
 ```
+
+http://158.160.35.136/jbrowse/
