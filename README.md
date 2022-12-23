@@ -41,7 +41,7 @@ After establishing a secure connection to remote servers, SSH users pass their u
 After establishing a connection with the server, the client tells the server the key pair with which it would like to authenticate. The server checks for this key pair in its database and then sends an encrypted message to the client. The client decrypts the message with its private key and generates a hash value that is sent back to the server for verification. The server generates its own hash value and compares it with the one sent by the client. When both hash values match, the server allows the user to interact with it.
 
 # Work
-
+## Remote Server
 Create the ssh keys
 ```
 ssh-keygen -t ed25519
@@ -68,8 +68,8 @@ Download and unpack the genome
 wget https://ftp.ensembl.org/pub/release-108/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 wget https://ftp.ensembl.org/pub/release-108/gff3/homo_sapiens/Homo_sapiens.GRCh38.108.gff3.gz
 
-gzip -d Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
-gzip -d Homo_sapiens.GRCh38.108.gff3.gz
+gunzip -d Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
+gunzip -d Homo_sapiens.GRCh38.108.gff3.gz
 ```
 
 Indexing
@@ -81,4 +81,72 @@ sudo apt-get install -y tabix
 (grep "^#" Homo_sapiens.GRCh38.108.gff3; grep -v "^#" Homo_sapiens.GRCh38.108.gff3 | sort -t"`printf '\t'`" -k1,1 -k4,4n) | bgzip > sorted.Homo_sapiens.GRCh38.108.gff3.gz
 
 tabix -p gff sorted.Homo_sapiens.GRCh38.108.gff3.gz
+```
+
+Download the BED files
+```
+# Chip-seq
+wget -O chip1.bed.gz "https://www.encodeproject.org/files/ENCFF874ZCC/@@download/ENCFF874ZCC.bed.gz" 
+wget -O chip2.bed.gz "https://www.encodeproject.org/files/ENCFF121HYT/@@download/ENCFF121HYT.bed.gz" 
+wget -O chip3.bed.gz "https://www.encodeproject.org/files/ENCFF018HXI/@@download/ENCFF018HXI.bed.gz" 
+
+# Atac
+wget -O atac.bed.gz "https://www.encodeproject.org/files/ENCFF438JMM/@@download/ENCFF438JMM.bed.gz"
+
+# unpacking
+gunzip chip1.bed.gz chip2.bed.gz chip3.bed.gz atac.bed.gz
+
+
+# sorting and indexing
+sudo apt install bedtools
+
+bedtools sort -i chip1.bed.gz > sort_chip1.bed
+bedtools sort -i chip2.bed.gz > sort_chip2.bed
+bedtools sort -i chip3.bed.gz > sort_chip3.bed
+bedtools sort -i atac.bed.gz > sort_atac.bed
+
+for i in sort_atac sort_chip1 sort_chip2 sort_chip3
+do
+    bgzip i.bed
+    tabix i.bed.gz
+done
+```
+
+## JBrowse 2
+
+Install JBrowse and nginx
+```
+sudo apt install build-essential zlib1g-dev
+sudo apt install nginx
+sudo apt install npm
+sudo apt install genometools
+npm install -g @jbrowse/cli
+```
+
+Create a new jbrowse repository and changing the configuraton file of nginx
+```
+jbrowse create /mnt/JBrowse
+sudo vi /etc/nginx/nginx.conf
+```
+
+Reload nginx
+```
+sudo systemctl restart nginx
+sudo systemctl status nginx
+```
+
+Add indexed files to JBrowser
+```
+sudo jbrowse add-assembly Homo_sapiens.GRCh38.dna.primary_assembly.fa --load copy --out /mnt/JBrowse
+sudo jbrowse add-track sorted.Homo_sapiens.GRCh38.108.gff3.gz --load copy --out /mnt/JBrowse
+
+sudo jbrowse add-track sort_chip1.bed.gz --load copy --out /mnt/JBrowse
+sudo jbrowse add-track sort_chip2.bed.gz --load copy --out /mnt/JBrowse
+sudo jbrowse add-track sort_chip3.bed.gz --load copy --out /mnt/JBrowse
+sudo jbrowse add-track sort_atac.bed.gz --load copy --out /mnt/JBrowse
+```
+
+Add indexing 
+```
+sudo jbrowse text-index --out //mnt/JBrowse
 ```
