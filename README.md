@@ -129,7 +129,7 @@ sudo npm install -g @jbrowse/cli
 Create a new jbrowse repository and changing the configuraton file of nginx
 ```
 jbrowse create /mnt/JBrowse
-sudo vi /etc/nginx/nginx.conf
+sudo nano /etc/nginx/nginx.conf
 ```
 
 Reload nginx
