@@ -39,3 +39,6 @@ After establishing a secure connection to remote servers, SSH users pass their u
 
 - Public Key Authentication:
 After establishing a connection with the server, the client tells the server the key pair with which it would like to authenticate. The server checks for this key pair in its database and then sends an encrypted message to the client. The client decrypts the message with its private key and generates a hash value that is sent back to the server for verification. The server generates its own hash value and compares it with the one sent by the client. When both hash values match, the server allows the user to interact with it.
+
+# Work
+
