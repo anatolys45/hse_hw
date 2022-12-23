@@ -42,3 +42,43 @@ After establishing a connection with the server, the client tells the server the
 
 # Work
 
+Create the ssh keys
+```
+ssh-keygen -t ed25519
+```
+
+Create a VM on Yandex Cloud:
+
+<img width="508" alt="Screenshot 2022-12-23 at 15 49 36" src="https://user-images.githubusercontent.com/121289219/209338988-f2a40dea-ed0d-498b-bed6-12474297c983.png">
+
+Our public address is 158.160.35.136. Connect to it using private key
+```
+sudo ssh -i /Users/anatolysysoev/Desktop/ed anatolys45@158.160.35.136
+```
+![IMAGE 2022-12-23 16:22:05](https://user-images.githubusercontent.com/121289219/209343070-40f79e01-371a-4a3e-ad89-62043ac71c51.jpg)
+
+Now install samtools
+```
+sudo apt-get update -y
+sudo apt-get install -y samtools
+```
+
+Download and unpack the genome
+```
+wget https://ftp.ensembl.org/pub/release-108/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
+wget https://ftp.ensembl.org/pub/release-108/gff3/homo_sapiens/Homo_sapiens.GRCh38.108.gff3.gz
+
+gzip -d Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
+gzip -d Homo_sapiens.GRCh38.108.gff3.gz
+```
+
+Indexing
+```
+samtools faidx Homo_sapiens.GRCh38.dna.primary_assembly.fa
+
+sudo apt-get install -y tabix
+
+(grep "^#" Homo_sapiens.GRCh38.108.gff3; grep -v "^#" Homo_sapiens.GRCh38.108.gff3 | sort -t"`printf '\t'`" -k1,1 -k4,4n) | bgzip > sorted.Homo_sapiens.GRCh38.108.gff3.gz
+
+tabix -p gff sorted.Homo_sapiens.GRCh38.108.gff3.gz
+```
